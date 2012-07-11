@@ -1,40 +1,59 @@
 <?php
-$DB_host = "localhost";
+	/*
+		Creator:	Bas van Beers
+		Klas:		INF2C
+		School:		HSLeiden
+		Project:	IPMEDT4
+		Groep:		6
+	*/
+	
+	//Database gegevens klaarzetten
+	$DB_host = "localhost";
 	$DB_database = "ipmedt4";
 	$DB_user = "school";
 	$DB_password = "ipmedt4";
-echo $_GET["jsoncallback"];
-if(isset($_GET['id']) and $_GET['id'] != NULL and $_GET['id'] != ''){
-	//Laad melding
-	$con = mysql_connect($DB_host,$DB_user,$DB_password);
-	if (!$con){
-		die('Could not connect: ' . mysql_error());
-	}
-	mysql_select_db($DB_database, $con);
+	
+	//JSON callback terugsturen voor de variabele aan de client kant
+	echo $_GET["jsoncallback"];
+	
+	//Kijken of er een nummer is meegestuurd
+	if(isset($_GET['id']) and $_GET['id'] != NULL and $_GET['id'] != ''){
+		//Nummer is meegestuurd dus nu halen we de gegevens van de melding op
+		
+		//Eerst een connectie maken met de mysql database
+		$con = mysql_connect($DB_host,$DB_user,$DB_password);
+		
+		//Kijken of de connectie is mislukt
+		if (!$con){
+			die('Could not connect: ' . mysql_error());
+		}
+		
+		//Selecteer database
+		mysql_select_db($DB_database, $con);
 
-	$result = mysql_query("SELECT * 
-		FROM  `projects` 
-		WHERE `id` = '".$_GET['id']."'");
+		//Selecteer bestaande projecten
+		$result = mysql_query("SELECT * 
+			FROM  `projects` 
+			WHERE `id` = '".$_GET['id']."'");
 			
-	$count = 0;
-			
-	while($row = mysql_fetch_array($result)){
-		$title = $row['titel'];
-		//$message = str_replace("\n", "", $row['message']);
-		$date = $row['date'] . " " . $row['time'];
-		$latitude = $row['latitude'];
-		$longitude = $row['longitutde'];
-		$id = $row['id'];
-	}
+		//Teller resetten
+		$count = 0;
+		
+		//Gegevens opslaan in vars
+		while($row = mysql_fetch_array($result)){
+			$title = $row['titel'];
+			$date = $row['date'] . " " . $row['time'];
+			$latitude = $row['latitude'];
+			$longitude = $row['longitutde'];
+			$id = $row['id'];
+		}
 
+	//Database connectie sluiten
 	mysql_close($con);
 	
+	//Gegevens weergeven om het terug te sturen	
 ?>({
-        "title":"<?=$title?>",<?php
-			if(3 == 1){
-		?>"message":"<?=$message?>",<?php
-			}
-		?>
+        "title":"<?=$title?>",
 		"date":"<?=$date?>",
 		"latitude":"<?=$latitude?>",
 		"longitutde":"<?=$longitude?>",
@@ -143,7 +162,8 @@ if(isset($_GET['id']) and $_GET['id'] != NULL and $_GET['id'] != ''){
 			mysql_close($con);
 		?>]
 })<?php
-}else{
+	}else{
+		//Gegevens weergeven indien er geen id is opgegeven
 ?>({
         "title":"PRIO 1 8941 HOOGT DE WOZOCO WILLIBRORDSTRAAT 1 ALPHEN NB Br OMS (INC: 01)",
 		"message":"BRAN | Midden- en West-Brabant | 1201999 BRW Midden en West Brabant ( Monitorcode ) BRAN | Midden- en West-Brabant | 1201921 BRW Alphen ( Lichtkrant ) BRAN | Midden- en West-Brabant | 1201352 BRW Midden en West Brabant BRAN | Midden- en West-Brabant | 1200148 BRW Alphen ( Blusgroep )",

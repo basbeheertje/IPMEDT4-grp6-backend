@@ -1,35 +1,65 @@
 <?php
 
-$DB_host = "localhost";
+	/*
+		Creator:	Bas van Beers
+		Klas:		INF2C
+		School:		HSLeiden
+		Project:	IPMEDT4
+		Groep:		6
+	*/
+	
+	//Database gegevens klaarzetten
+	$DB_host = "localhost";
 	$DB_database = "ipmedt4";
 	$DB_user = "school";
 	$DB_password = "ipmedt4";
-echo $_GET["jsoncallback"];
-if(isset($_GET['id']) and $_GET['id'] != NULL and $_GET['id'] != ''){
-	//Laad melding
-	$con = mysql_connect($DB_host,$DB_user,$DB_password);
-	if (!$con){
-		die('Could not connect: ' . mysql_error());
-	}
-	mysql_select_db($DB_database, $con);
+	
+	//JSON Object terugsturen
+	echo $_GET["jsoncallback"];
+	
+	//Kijken of er een nummer is meegegeven en of deze niet leeg is
+	if(isset($_GET['id']) and $_GET['id'] != NULL and $_GET['id'] != ''){
+		//Laad melding
+		
+		//Maak een connectie met de database aan
+		$con = mysql_connect($DB_host,$DB_user,$DB_password);
+		
+		//Controleren of de connectie werkt
+		if (!$con){
+			//Connectie werkt niet dus geef de melding weer en sluit af
+			die('Could not connect: ' . mysql_error());
+		}
+		
+		//Selecteren van de database
+		mysql_select_db($DB_database, $con);
 
-	$result = mysql_query("SELECT * 
-		FROM  `users` 
-		WHERE `username` = '".$_GET['id']."'");
+		//selecteren van de gegevens voor de gebruiker omtrent de chats die openstaan
+		$result = mysql_query("SELECT * 
+			FROM  `users` 
+			WHERE `username` = '".$_GET['id']."'");
 			
-	$count = 0;
+		$count = 0;
 
-	mysql_close($con);
+		//Connectie verbreken
+		mysql_close($con);
 	
 ?>({
         "Reacties":[
         <?php
+			
+			//Connectie aanmaken met de database
 			$con = mysql_connect($DB_host,$DB_user,$DB_password);
+			
+			//Connectie controleren
 			if (!$con){
+				//Connectie is niet mogelijk dus geef de fout weer
 				die('Could not connect: ' . mysql_error());
 			}
+			
+			//Database selecteren
 			mysql_select_db($DB_database, $con);
 
+			//Chats van de gebruiker selecteren
 			$result = mysql_query("SELECT r.text as reactie, p.titel as meldingstitel, p.id as nummer
 				FROM  `reacties` as r, `projects` as p
 				WHERE r.`user` = '".$_GET['id']."'
@@ -37,9 +67,11 @@ if(isset($_GET['id']) and $_GET['id'] != NULL and $_GET['id'] != ''){
 				GROUP BY r.`melding`
 				ORDER BY r.`create_date` DESC
 				");
-					
+			
+			//Teller resetten
 			$count = 0;
-					
+			
+			//Items printen en versturen naar de client
 			while($row = mysql_fetch_array($result)){
 				$count++;
 				print "
@@ -54,34 +86,10 @@ if(isset($_GET['id']) and $_GET['id'] != NULL and $_GET['id'] != ''){
 				}
 			}
 
+			//MYSQL connectie afsluiten
 			mysql_close($con);
+			
 		?>]
 })<?php
-}else{
-?>({
-        "title":"PRIO 1 8941 HOOGT DE WOZOCO WILLIBRORDSTRAAT 1 ALPHEN NB Br OMS (INC: 01)",
-		"message":"BRAN | Midden- en West-Brabant | 1201999 BRW Midden en West Brabant ( Monitorcode ) BRAN | Midden- en West-Brabant | 1201921 BRW Alphen ( Lichtkrant ) BRAN | Midden- en West-Brabant | 1201352 BRW Midden en West Brabant BRAN | Midden- en West-Brabant | 1200148 BRW Alphen ( Blusgroep )",
-		"date":"Wed, 28 Mar 2012 12:53:59",
-		"latitude":"51.4831910",
-		"longitutde":"4.9537840",
-		"id":"2",
-        "reacties":[
-        {
-            "title":"B AKKERWINDEVELD WOERDEN",
-            "message":"AMBU | Utrecht | 0726128 RAV Utrecht ( Ambu 09-128 )",
-            "date":"Wed, 28 Mar 2012 12:54:01",
-			"latitude":"52.079707",
-			"longitutde":"4.8626876",
-			"id":"1"
-        },
-        {
-            "title":"PRIO 1 8941 HOOGT DE WOZOCO WILLIBRORDSTRAAT 1 ALPHEN NB Br OMS (INC: 01)",
-            "message":"BRAN | Midden- en West-Brabant | 1201999 BRW Midden en West Brabant ( Monitorcode ) BRAN | Midden- en West-Brabant | 1201921 BRW Alphen ( Lichtkrant ) BRAN | Midden- en West-Brabant | 1201352 BRW Midden en West Brabant BRAN | Midden- en West-Brabant | 1200148 BRW Alphen ( Blusgroep )",
-            "date":"Wed, 28 Mar 2012 12:53:59",
-			"latitude":"51.4831910",
-			"longitutde":"4.9537840",
-			"id":"2"
-        }] 
-})<?php
-}
+	}
 ?>
